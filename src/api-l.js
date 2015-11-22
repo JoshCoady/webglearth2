@@ -272,6 +272,37 @@ exportSymbolL('WE.polygon', function(points, opts) {
       poly.setFillColor(opts['fillColor'] || '#03f',
                         opts['fillOpacity'] || 0.2);
       poly.polygon_.primitiveLine.width = opts['weight'] || 5; //TODO: cleaner
+      console.dir(poly.polygon_.primitiveLine.positions);
+      return poly;
+    }
+  };
+});
+
+
+exportSymbolL('WE.polyline', function(points, opts) {
+  // our design is not prepared for polylines not assigned to any app -> hack
+  return {
+    'addTo': /** @suppress {accessControls} */function(app) {
+      //WARNING: addTo returns something different than WE.polyline !
+      var poly = new weapi.exports.Polyline(app);
+      var points_ = [];
+      goog.array.forEachRight(points, function(el, i, arr) {
+        if (!goog.isArray(el)) el = [el['lat'], el['lng']];
+        points_.push([el[0], el[1], el[2]]);
+      });
+      poly.setPositions(points_);
+      opts = opts || {};
+      poly.setColor(opts['color'] || '#03f',
+                          opts['opacity'] || 0.5);
+
+      //TODO: cleaner
+      poly.polyline_.primitive.width = opts['weight'] || 5;
+      if(opts['glow'] > 0.0)
+      {
+        poly.polyline_.primitive.material.type = 'PolylineGlow';
+        poly.polyline_.primitive.material.uniforms['glowPower'] = opts['glow'];
+      }
+
       return poly;
     }
   };

@@ -11,12 +11,14 @@ goog.provide('weapi.exports.Map');
 goog.provide('weapi.exports.Maps');
 goog.provide('weapi.exports.Marker');
 goog.provide('weapi.exports.Polygon');
+goog.provide('weapi.exports.Polyline');
 
 goog.require('goog.math');
 
 goog.require('we.canvas2image');
 goog.require('weapi.App');
 goog.require('weapi.EditablePolygon');
+goog.require('weapi.Polyline');
 goog.require('weapi.Map');
 goog.require('weapi.MiniGlobe');
 
@@ -715,6 +717,66 @@ weapi.exports.Polygon.prototype.onClick = function(callback) {
 };
 exportSymbol('WebGLEarth.Polygon.prototype.onClick',
              weapi.exports.Polygon.prototype.onClick);
+
+////////////////////////////////////////////////////////////////////////////////
+/* Polylines */
+
+
+// TODO: Expand to be more consistent with the Polygon API
+
+
+/**
+ * Creates a basic, non-editable polyline.
+ * @param {!weapi.App} app .
+ * @constructor
+ */
+weapi.exports.Polyline = function(app) {
+  /**
+   * @type {!weapi.App}
+   * @protected
+   */
+  this.app = app;
+
+  /**
+   * @type {!weapi.Polyline}
+   * @private
+   */
+  this.polyline_ = new weapi.Polyline();
+  this.app.addPrimitive(this.polyline_.primitiveCol);
+  this.app.sceneChanged = true;
+};
+exportSymbol('WebGLEarth.Polyline', weapi.exports.Polyline);
+
+
+/**
+ * @param {string} hexColor #rrggbb.
+ * @param {number=} opt_a [0-1], defaults to 1.
+ */
+weapi.exports.Polyline.prototype.setColor = function (hexColor, opt_a) {
+  hexColor = goog.color.normalizeHex(hexColor);
+  var r = parseInt(hexColor.substr(1, 2), 16) / 255;
+  var g = parseInt(hexColor.substr(3, 2), 16) / 255;
+  var b = parseInt(hexColor.substr(5, 2), 16) / 255;
+
+  this.polyline_.primitive.material.uniforms['color'] =
+      new Cesium.Color(r, g, b, opt_a);
+
+  this.app.sceneChanged = true;
+};
+exportSymbol('WebGLEarth.Polyline.prototype.setColor',
+             weapi.exports.Polyline.prototype.setColor);
+
+
+/**
+ * @param {!Array.<number>} positions
+ */
+weapi.exports.Polyline.prototype.setPositions = function (positions) {
+  this.polyline_.setPositions(positions);
+  this.app.sceneChanged = true;
+};
+exportSymbol('WebGLEarth.Polyline.prototype.setPositions',
+    weapi.exports.Polyline.prototype.setPositions);
+
 
 
 ////////////////////////////////////////////////////////////////////////////////
